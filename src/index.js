@@ -18,12 +18,12 @@ fetch('http://localhost:3000/toys')
 .then(toysObj => renderCards(toysObj))
 
 
-function renderCards(toysObj) {
-  toysObj.forEach((toys) => createCard(toys))
+function renderCards(toysArr) {
+    toysArr.forEach((toy) => createCard(toy))
 }
 
 
-function createCard(toys) {
+function createCard(toy) {
 const toyCollection = document.getElementById('toy-collection')
 const toyName = document.createElement('h2')
 const toyImg = document.createElement('img')
@@ -32,10 +32,10 @@ const likeButton = document.createElement('button')
 const toyCard = document.createElement('div')
 
 toyCard.className = "card"
-toyName.textConent = toys['name']
-toyImg.src = toys['image']
+toyName.textContent = toy.name
+toyImg.src = toy.image
 toyImg.className = "toy-avatar"
-toyLikes.textContent = `${toys.likes} likes`
+toyLikes.textContent = `${toy.likes} likes`
 likeButton.textContent = "Like!"
 
 toyCollection.appendChild(toyCard);
@@ -45,9 +45,8 @@ toyCard.appendChild(toyLikes);
 toyCard.appendChild(likeButton);
 
 likeButton.addEventListener('click', (e) => {
-  toys.likes++
-  toyLikes.textContent = `${toys.likes} likes`
-  postNewLikes(`http://localhost:3000/toys/${toys.id}`, {likes: parseInt(toys.likes)})
+  toyLikes.textContent = `${++toy.likes} likes`
+  postNewLikes(`http://localhost:3000/toys/${toy.id}`, {likes: parseInt(toy.likes)})
   
   
 })
@@ -63,6 +62,10 @@ function createNewToy() {
   const form = document.getElementsByTagName('form')[0]
   const newToyName = document.getElementsByClassName('input-text')[0]
   const newToyImg = document.getElementsByClassName('input-text')[1]
+  if (newToyName.value.length.trim() === 0 || newToyImg.value.length.trim() === 0) {
+    console.log("Add data dum-dum")
+    return;
+  }
   const newToyObj = {
     name: newToyName.value,
     image: newToyImg.value,
@@ -75,26 +78,32 @@ function createNewToy() {
 
 
 const postNewToy = (url, body) => {
-  const configurationObject = {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-    },
-    body: JSON.stringify(body)
-}
-return fetch(url, configurationObject)
+//   const configurationObject = {
+//     method: 'POST',
+//     headers: {
+//         'Content-Type': 'application/json',
+//         'Accept': 'application/json'
+//     },
+//     body: JSON.stringify(body)
+// }
+  const configurationObject = getConfig("POST", body)
+  return fetch(url, configurationObject)
 }
 
 
 const postNewLikes = (url, body) => {
+  const configurationObject = getPatchConfig("PATCH", body)
+  return fetch(url, configurationObject)
+}
+
+// setting config to a dynamic function
+const getConfig = (verb, body) => {
   const configurationObject = {
-    method: 'PATCH',
+    method: verb,
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     },
     body: JSON.stringify(body)
-}
-return fetch(url, configurationObject)
+  }
 }
